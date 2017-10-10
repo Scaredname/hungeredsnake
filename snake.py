@@ -23,14 +23,14 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 
 class food(pygame.sprite.Sprite):
-    ""
+    """
     食物类
-    ""
+    """
     def __init__(self, screen):
         pygame.sprite.Sprite.__init__(self)
 
         self.screen = screen
-        self.ran_pos = positon((randint(0, 620),  randint(0, 460))
+        self.ran_pos = positon(randint(0, 620),  randint(0, 460))
         self.creat()
     
     def creat(self):
@@ -43,9 +43,9 @@ class positon():
         self.y = y
 
 class snake(pygame.sprite.Sprite):
-    ""
+    """
     贪吃蛇类
-    ""
+    """
     def __init__(self, screen, snake_len = 2):
         pygame.sprite.Sprite.__init__(self)
 
@@ -83,6 +83,8 @@ class snake(pygame.sprite.Sprite):
         for each in self.snake_body:
             self.draw(each, BLUE)
         # 少一个碰壁结束游戏的判断
+
+
 
 
 
