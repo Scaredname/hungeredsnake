@@ -52,18 +52,20 @@ class snake(pygame.sprite.Sprite):
         self.screen = screen
         self.snake_len = snake_len
         self.snake_body = []
+        self.creat()
     
     def creat(self):
-        self.snake_head = positon(randint(100,300), randint(100, 300))
+        self.snake_head = self.toRect(positon(randint(100,300), randint(100, 300)))
         self.draw(self.snake_head, RED)
         for i in range(self.snake_len):
-            snake_body = positon(self.snake_head.x + 20 * (i + 1), self.snake_head.y)
+            snake_body = self.toRect(positon(self.snake_head.x + 20 * (i + 1), self.snake_head.y))
             self.snake_body.append(snake_body)
         for each in self.snake_body:
             self.draw(each, BLUE)
+    def toRect(self,rect_pos):
+        return pygame.Rect(rect_pos.x, rect_pos.y, 19, 19)
 
-    def draw(self, rect_pos, color):
-        rect = pygame.Rect(rect_pos.x, rect_pos.y, 20, 20)
+    def draw(self, rect, color):
         pygame.draw.rect(self.screen, color, rect)
 
     def move(self, direction):
@@ -76,17 +78,20 @@ class snake(pygame.sprite.Sprite):
                 self.snake_body[i].x = self.snake_body[i - 1].x
                 self.snake_body[i].y = self.snake_body[i - 1].y
         
-        self.snake_head.x += direction.x
-        self.snake_head.y += direction.y
-        self.draw(self.snake_head, RED)
 
         for each in self.snake_body:
             self.draw(each, BLUE)
+
+        self.snake_head.x += direction.x
+        self.snake_head.y += direction.y
+        self.draw(self.snake_head, RED)
         # 少一个碰壁结束游戏的判断
+        pygame.display.update(self.snake_body)
 
 
-
-
+def test(testSnake):
+    testSnake.move(positon(0, 20))
+    
 
 def main():
     # 固定参数
@@ -95,9 +100,9 @@ def main():
     # 初始化
     pygame.init() 
     clock = pygame.time.Clock()
-
     screen = pygame.display.set_mode(size)
-    screen.fill((255, 255, 255))
+    screen.fill(WHITE)
+    mysnake = snake(screen)
 
     # 游戏运行
     running = True
@@ -105,6 +110,9 @@ def main():
         for event in pygame.event.get():
             if event.type == QUIT:
                 sys.exit()
+            elif event.type == KEYDOWN:
+                if event.key == K_w:
+                    test(mysnake)
 
         pygame.display.flip()
         clock.tick(30)
