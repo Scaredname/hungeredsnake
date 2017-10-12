@@ -78,19 +78,19 @@ class snake(pygame.sprite.Sprite):
                 self.snake_body[i].x = self.snake_body[i - 1].x
                 self.snake_body[i].y = self.snake_body[i - 1].y
         
-
-        for each in self.snake_body:
-            self.draw(each, BLUE)
-
         self.snake_head.x += direction.x
         self.snake_head.y += direction.y
-        self.draw(self.snake_head, RED)
+        
         # 少一个碰壁结束游戏的判断
-        pygame.display.update(self.snake_body)
+    def drawall(self):
+        self.draw(self.snake_head, RED)
+        for each in self.snake_body:
+            self.draw(each, BLUE)
 
 
 def test(testSnake):
     testSnake.move(positon(0, 20))
+    print(testSnake.snake_body)
     
 
 def main():
@@ -101,19 +101,26 @@ def main():
     pygame.init() 
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode(size)
-    screen.fill(WHITE)
+    
     mysnake = snake(screen)
 
+    # 测试
+    rect_pos = positon(20, 30)
     # 游戏运行
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == QUIT:
                 sys.exit()
-            elif event.type == KEYDOWN:
-                if event.key == K_w:
-                    test(mysnake)
+        
+        if event.type == KEYDOWN:
+            if event.key == K_w:
+                test(mysnake)
+                rect_pos.x += 5
+                rect_pos.y += 5
 
+        screen.fill(WHITE) #screenfill的位置很关键啊！卡了我好久。
+        mysnake.drawall()
         pygame.display.flip()
         clock.tick(30)
 
