@@ -16,11 +16,13 @@ from pygame.locals import *
 from random import *
 
 # 常量
+SIZE = 20
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
+
 
 class food(pygame.sprite.Sprite):
     """
@@ -34,7 +36,7 @@ class food(pygame.sprite.Sprite):
         self.creat()
     
     def creat(self):
-        ran_food = pygame.Rect(self.ran_pos.x, self.ran_pos.y, 20, 20)
+        ran_food = pygame.Rect(self.ran_pos.x, self.ran_pos.y, SIZE, SIZE)
         pygame.draw.rect(self.screen,BLUE, ran_food)
 
 class positon():
@@ -58,12 +60,12 @@ class snake(pygame.sprite.Sprite):
         self.snake_head = self.toRect(positon(randint(100,300), randint(100, 300)))
         self.draw(self.snake_head, RED)
         for i in range(self.snake_len):
-            snake_body = self.toRect(positon(self.snake_head.x + 20 * (i + 1), self.snake_head.y))
+            snake_body = self.toRect(positon(self.snake_head.x + SIZE * (i + 1), self.snake_head.y))
             self.snake_body.append(snake_body)
         for each in self.snake_body:
             self.draw(each, BLUE)
     def toRect(self,rect_pos):
-        return pygame.Rect(rect_pos.x, rect_pos.y, 19, 19)
+        return pygame.Rect(rect_pos.x, rect_pos.y, SIZE - 1, SIZE - 1)
 
     def draw(self, rect, color):
         pygame.draw.rect(self.screen, color, rect)
@@ -88,14 +90,18 @@ class snake(pygame.sprite.Sprite):
             self.draw(each, BLUE)
 
 
-def test(testSnake):
-    testSnake.move(positon(0, 20))
-    print(testSnake.snake_body)
+# def test(testSnake):
+#     testSnake.move(positon(0, 20))
+#     print(testSnake.snake_body)
     
 
 def main():
     # 固定参数
     size = width, height = 640, 480
+    down = positon(0, 5)
+    up = positon(0, -5)
+    left = positon(-5, 0)
+    right = positon(5, 0)
 
     # 初始化
     pygame.init() 
@@ -103,6 +109,7 @@ def main():
     screen = pygame.display.set_mode(size)
     
     mysnake = snake(screen)
+    direction = choice([up, down, left, right])
 
     # 测试
     rect_pos = positon(20, 30)
@@ -114,12 +121,22 @@ def main():
                 sys.exit()
         
         if event.type == KEYDOWN:
-            if event.key == K_w:
-                test(mysnake)
-                rect_pos.x += 5
-                rect_pos.y += 5
+                if event.key == K_w:
+                    if direction != down:
+                        direction = up
+                if event.key == K_s:
+                    if direction != up:
+                        direction = down
+                if event.key == K_a:
+                    if direction != right:
+                        direction = left
+                if event.key == K_d:
+                    if direction != left:
+                        direction = right
 
         screen.fill(WHITE) #screenfill的位置很关键啊！卡了我好久。
+        
+        mysnake.move(direction)
         mysnake.drawall()
         pygame.display.flip()
         clock.tick(30)
