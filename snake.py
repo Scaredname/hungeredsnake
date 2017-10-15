@@ -33,11 +33,23 @@ class food(pygame.sprite.Sprite):
 
         self.screen = screen
         self.ran_pos = positon(randint(0, 620),  randint(0, 460))
-        self.creat()
+        self.islive = True
+        self.draw()
+    
+    def draw(self):
+        ran_food = pygame.Rect(self.ran_pos.x, self.ran_pos.y, SIZE, SIZE)
+        pygame.draw.rect(self.screen,GREEN, ran_food)
     
     def creat(self):
-        ran_food = pygame.Rect(self.ran_pos.x, self.ran_pos.y, SIZE, SIZE)
-        pygame.draw.rect(self.screen,BLUE, ran_food)
+        self.islive = True
+        self.ran_pos = positon(randint(0, 620),  randint(0, 460))
+
+    def check(self):
+        if self.islive:
+            self.draw()
+        else:
+            self.creat()
+            self.draw()
 
 class positon():
     def __init__(self, x, y):
@@ -53,11 +65,12 @@ class snake(pygame.sprite.Sprite):
 
         self.screen = screen
         self.snake_len = snake_len
+        self.snake_head_pos = positon(randint(100,300), randint(100, 300))
         self.snake_body = []
         self.creat()
     
     def creat(self):
-        self.snake_head = self.toRect(positon(randint(100,300), randint(100, 300)))
+        self.snake_head = self.toRect(self.snake_head_pos)
         self.draw(self.snake_head, RED)
         for i in range(self.snake_len):
             snake_body = self.toRect(positon(self.snake_head.x + SIZE * (i + 1), self.snake_head.y))
@@ -89,19 +102,24 @@ class snake(pygame.sprite.Sprite):
         for each in self.snake_body:
             self.draw(each, BLUE)
 
-
 # def test(testSnake):
 #     testSnake.move(positon(0, 20))
 #     print(testSnake.snake_body)
-    
+
+# 碰撞检测
+def check_collision(moving_sanke, food_list):
+    for each in food_list:
+        if abs(moving_sanke.snake_head.x - each.ran_pos.x) < 20\
+         and abs(moving_sanke.snake_head.y - each.ran_pos.y) < 20:
+            each.islive = False
 
 def main():
     # 固定参数
     size = width, height = 640, 480
-    down = positon(0, 5)
-    up = positon(0, -5)
-    left = positon(-5, 0)
-    right = positon(5, 0)
+    down = positon(0, SIZE)
+    up = positon(0, -SIZE)
+    left = positon(-SIZE, 0)
+    right = positon(SIZE, 0)
 
     # 初始化
     pygame.init() 
@@ -110,11 +128,13 @@ def main():
     
     mysnake = snake(screen)
     direction = choice([up, down, left, right])
+    foods = []
 
     # 测试
     rect_pos = positon(20, 30)
     # 游戏运行
     running = True
+    foods.append(food(screen))
     while running:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -136,10 +156,16 @@ def main():
 
         screen.fill(WHITE) #screenfill的位置很关键啊！卡了我好久。
         
+        # 食物绘制,碰撞检测
+        for each in foods:
+            each.check()
+        check_collision(mysnake, foods)
+        # 贪食蛇的绘制移动，有一个默认移动方向
         mysnake.move(direction)
         mysnake.drawall()
+        
         pygame.display.flip()
-        clock.tick(30)
+        clock.tick(5)
 
 if __name__ == "__main__":
     main() 
