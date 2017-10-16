@@ -16,6 +16,7 @@ from pygame.locals import *
 from random import *
 
 # 常量
+size = width, height = 640, 480
 SIZE = 20
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -32,7 +33,7 @@ class food(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         self.screen = screen
-        self.ran_pos = positon(randint(0, 620),  randint(0, 460))
+        self.ran_pos = position(randint(0, 620),  randint(0, 460))
         self.islive = True
         self.draw()
     
@@ -42,7 +43,7 @@ class food(pygame.sprite.Sprite):
     
     def creat(self):
         self.islive = True
-        self.ran_pos = positon(randint(0, 620),  randint(0, 460))
+        self.ran_pos = position(randint(0, 620),  randint(0, 460))
 
     def check(self):
         if self.islive:
@@ -51,7 +52,7 @@ class food(pygame.sprite.Sprite):
             self.creat()
             self.draw()
 
-class positon():
+class position():
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -65,7 +66,7 @@ class snake(pygame.sprite.Sprite):
 
         self.screen = screen
         self.snake_len = snake_len
-        self.snake_head_pos = positon(randint(100,300), randint(100, 300))
+        self.snake_head_pos = position(randint(100,300), randint(100, 300))
         self.snake_body = []
         self.creat()
     
@@ -73,7 +74,7 @@ class snake(pygame.sprite.Sprite):
         self.snake_head = self.toRect(self.snake_head_pos)
         self.draw(self.snake_head, RED)
         for i in range(self.snake_len):
-            snake_body = self.toRect(positon(self.snake_head.x + SIZE * (i + 1), self.snake_head.y))
+            snake_body = self.toRect(position(self.snake_head.x + SIZE * (i + 1), self.snake_head.y))
             self.snake_body.append(snake_body)
         for each in self.snake_body:
             self.draw(each, BLUE)
@@ -96,14 +97,21 @@ class snake(pygame.sprite.Sprite):
         self.snake_head.x += direction.x
         self.snake_head.y += direction.y
         
-        # 少一个碰壁结束游戏的判断
+        # 碰壁结束游戏的判断
     def drawall(self):
         self.draw(self.snake_head, RED)
         for each in self.snake_body:
             self.draw(each, BLUE)
-
+    
+    def addbody(self):
+        body_len = len(self.snake_body)
+        x = self.snake_body[body_len - 2].x - self.snake_body[body_len - 1].x
+        y = self.snake_body[body_len - 2].y - self.snake_body[body_len - 1].y
+        addbody =  self.toRect(position(self.snake_body[body_len - 1].x - x,\
+                    self.snake_body[body_len - 1].y - y))
+        self.snake_body.append(addbody)
 # def test(testSnake):
-#     testSnake.move(positon(0, 20))
+#     testSnake.move(position(0, 20))
 #     print(testSnake.snake_body)
 
 # 碰撞检测
@@ -112,14 +120,14 @@ def check_collision(moving_sanke, food_list):
         if abs(moving_sanke.snake_head.x - each.ran_pos.x) < 20\
          and abs(moving_sanke.snake_head.y - each.ran_pos.y) < 20:
             each.islive = False
+            moving_sanke.addbody()
 
 def main():
     # 固定参数
-    size = width, height = 640, 480
-    down = positon(0, SIZE)
-    up = positon(0, -SIZE)
-    left = positon(-SIZE, 0)
-    right = positon(SIZE, 0)
+    down = position(0, SIZE)
+    up = position(0, -SIZE)
+    left = position(-SIZE, 0)
+    right = position(SIZE, 0)
 
     # 初始化
     pygame.init() 
@@ -131,7 +139,7 @@ def main():
     foods = []
 
     # 测试
-    rect_pos = positon(20, 30)
+    rect_pos = position(20, 30)
     # 游戏运行
     running = True
     foods.append(food(screen))
@@ -140,23 +148,25 @@ def main():
             if event.type == QUIT:
                 sys.exit()
         
-        if event.type == KEYDOWN:
-                if event.key == K_w:
-                    if direction != down:
+        key_pressed = pygame.key.get_pressed()
+
+        if key_pressed[K_w] or key_pressed[K_UP]:
+            if direction != down:
                         direction = up
-                if event.key == K_s:
-                    if direction != up:
+        if key_pressed[K_s] or key_pressed[K_DOWN]:
+            if direction != up:
                         direction = down
-                if event.key == K_a:
-                    if direction != right:
+        if key_pressed[K_a] or key_pressed[K_LEFT]:
+            if direction != right:
                         direction = left
-                if event.key == K_d:
-                    if direction != left:
+        if key_pressed[K_d] or key_pressed[K_RIGHT]:
+            if direction != left:
                         direction = right
+                   
 
         screen.fill(WHITE) #screenfill的位置很关键啊！卡了我好久。
         
-        # 食物绘制,碰撞检测
+        # 食物绘制,碰撞检测,增加身体
         for each in foods:
             each.check()
         check_collision(mysnake, foods)
